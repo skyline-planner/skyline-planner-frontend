@@ -70,6 +70,9 @@ src/
 - 도메인별 API 함수는 각 `features/*/api/` 에 위치
 - 응답 형태: `{ data, error, status }` 통일
 - 에러 처리는 API 레이어에서 처리 (호출부에서 try/catch 금지)
+- API 연결 전까지 MSW(Mock Service Worker)로 모든 네트워크 요청을 가로챔
+- 모든 API 스펙은 /src/mocks/handlers.ts에 미리 선언해두고, 백엔드 연결 시 URL만 교체
+
 
 ### 백엔드 미완성 대응
 - 백엔드 API가 아직 없는 기능은 `src/shared/api/mocks/` 에 mock 함수 작성
@@ -86,16 +89,87 @@ src/
 - 인라인 스타일 금지
 - 매직 넘버 금지 — 상수로 추출
 
+## 화면 디자인 참조
+
+화면 디자인 시안은 `docs/designs/` 폴더에 있다.
+특정 화면을 구현할 때는 아래 파일을 Read 도구로 읽어 레이아웃과 UI 요소를 참고할 것.
+
+| 화면 | 파일명 |
+|------|--------|
+| 홈(랜딩) | `docs/designs/홈.png` |
+| 메인 피드 | `docs/designs/메인페이지.png` |
+| 로그인 | `docs/designs/로그인` *(폴더)* |
+| 회원가입 | `docs/designs/회원가입 페이지.png` |
+| 닉네임 설정 | `docs/designs/닉네임 받기.png` |
+| 내 여행 목록 | `docs/designs/내 여행 관리.png` |
+| 여행 생성 | `docs/designs/여행 생성하기.png` |
+| 여행 일자 추가 | `docs/designs/여행 일자 추가하기.png` |
+| 일정 추가 (첫번째) | `docs/designs/일정 추가하기 - 첫번째.png` |
+| 장소 추가 | `docs/designs/장소 추가하기.png` |
+| 여행 지역 검색 | `docs/designs/여행 지역 검색창.png` |
+| 지역 변경 | `docs/designs/지역 변경하기.png` |
+| AI 일정 추가 | `docs/designs/AI 일정 추가하기.png` |
+| AI 분석 결과 | `docs/designs/AI 분석하기 누른 후.png` |
+| 여행 상세 기록 | `docs/designs/여행 상세 기록 페이지.png` |
+| 여행 상세 기록 (탭2) | `docs/designs/여행 상세 기록 페이지-1.png` |
+| 최적화 리포트 | `docs/designs/최적화 리포트.png` |
+| 최적화 리포트 (잠금) | `docs/designs/최적화 리포트 보기 불가능.png` |
+| 프로필 | `docs/designs/프로필.png` |
+| 프로필 수정 | `docs/designs/프로필 수정.png` |
+| 탈퇴 안내 | `docs/designs/탈퇴 안내문.png` |
+| 탈퇴 완료 | `docs/designs/탈퇴가 완료 된 후.png` |
+| 404 에러 | `docs/designs/404 - ERROR 페이지.png` |
+
+> 구현 요청 시 "디자인 참고해서 만들어줘" 라고 하면 해당 화면 파일을 먼저 읽고 구현한다.
+
+## 브랜치 전략
+
+```
+main
+└── develop          ← 통합 브랜치 (PR 머지 대상)
+    ├── feature/xxx  ← 신규 기능
+    ├── fix/xxx      ← 버그 수정
+    ├── refactor/xxx ← 리팩토링
+    └── chore/xxx    ← 설정·빌드·의존성
+```
+
+### 브랜치 네이밍 규칙
+- `feature/trip-create` — 새 기능 (도메인-행위 형태, kebab-case)
+- `fix/login-redirect` — 버그 수정
+- `refactor/trip-card` — 코드 개선 (기능 변경 없음)
+- `chore/msw-setup`    — 설정·의존성·문서
+
+### 작업 흐름
+1. `develop` 에서 분기 → 작업 → PR → `develop` 머지
+2. 기능 완성 후 `develop` → `main` 머지 (배포)
+3. 새 작업 시작 전 반드시 `/branch` 커맨드로 브랜치 생성
+4. **`main`과 `develop`에 직접 커밋 금지** — 항상 feature 브랜치에서 작업
+
+### 브랜치 명령 예시
+```bash
+git checkout develop
+git checkout -b feature/trip-create
+# 작업 후
+git push -u origin feature/trip-create
+```
+
 ## 커스텀 커맨드 (`.claude/commands/`)
+- `/branch` : 작업할 내용을 기반으로 브랜치 생성 및 체크아웃
 - `/commit` : 스테이징된 변경사항 기준으로 컨벤션에 맞는 커밋 메시지 생성
+- `/pr`     : 현재 브랜치 기준으로 GitHub PR 생성 (gh CLI 필요)
 - `/review` : 현재 변경사항 코드 리뷰
 - `/spec`   : 새 기능 구현 전 `docs/specs/`에 마크다운 스펙 초안 작성
 
+> gh CLI 설치: `winget install --id GitHub.cli` → `gh auth login`
+
+> 커맨드가 목록에 보이지 않으면 Claude Code를 `skyline-frontend/` 디렉토리 안에서 실행했는지 확인할 것.
+
 ## 작업 방식
-1. 복잡한 기능은 구현 전 `/spec` 커맨드로 스펙 먼저 작성
-2. 커밋 메시지 prefix: `feat` / `fix` / `refactor` / `docs` / `chore`
-3. 새 컴포넌트 만들 때는 관련 타입도 함께 정의
-4. API 엔드포인트 추가 시 `src/shared/types/api.ts` 타입도 함께 업데이트
+1. 새 기능 시작 → `/branch` 로 브랜치 생성
+2. 복잡한 기능은 구현 전 `/spec` 커맨드로 스펙 먼저 작성
+3. 커밋 메시지 prefix: `feat` / `fix` / `refactor` / `docs` / `chore`
+4. 새 컴포넌트 만들 때는 관련 타입도 함께 정의
+5. API 엔드포인트 추가 시 `src/shared/types/api.ts` 타입도 함께 업데이트
 
 ## 하지 말아야 할 것
 - `console.log` 를 커밋에 포함하지 말 것 (디버깅 후 반드시 제거)
@@ -103,3 +177,4 @@ src/
 - `node_modules`, `dist`, `.env*` 파일을 읽거나 수정하지 말 것
 - 기존 동작 중인 컴포넌트를 무단으로 리팩토링하지 말 것
 - `features/` 간 직접 import 금지 — 공유가 필요하면 `shared/`로 이동
+
