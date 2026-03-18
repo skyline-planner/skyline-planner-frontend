@@ -156,8 +156,11 @@ git push -u origin feature/trip-create
 ## 커스텀 커맨드 (`.claude/commands/`)
 - `/branch` : 작업할 내용을 기반으로 브랜치 생성 및 체크아웃
 - `/commit` : 스테이징된 변경사항 기준으로 컨벤션에 맞는 커밋 메시지 생성
+- `/pr`     : 현재 브랜치 기준으로 GitHub PR 생성 (gh CLI 필요)
 - `/review` : 현재 변경사항 코드 리뷰
 - `/spec`   : 새 기능 구현 전 `docs/specs/`에 마크다운 스펙 초안 작성
+
+> gh CLI 설치: `winget install --id GitHub.cli` → `gh auth login`
 
 > 커맨드가 목록에 보이지 않으면 Claude Code를 `skyline-frontend/` 디렉토리 안에서 실행했는지 확인할 것.
 
