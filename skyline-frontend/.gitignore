@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Design assets (local reference only, not tracked in git)
+docs/designs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
