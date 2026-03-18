@@ -37,3 +37,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# claude/.claude/
+.claude/settings.local.json
