@@ -41,3 +41,7 @@ coverage/
 # claude/.claude/
 .claude/settings.local.json
 .claude
+CLAUDE.md
+
+# docs
+docs
