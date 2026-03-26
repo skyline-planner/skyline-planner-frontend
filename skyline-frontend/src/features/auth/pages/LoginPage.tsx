@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { startGoogleOAuth } from "../api/authApi";
+import { useAuthStore } from "@/shared/stores/authStore";
 
 /**
  * SCR-02 로그인 화면
  * - Google OAuth 버튼을 통해 소셜 로그인 진행
  * - MSW 환경에서는 목업 토큰을 저장하고 홈으로 이동
  * - 실제 환경에서는 백엔드 OAuth 엔드포인트로 리다이렉트
+ * - 이미 로그인된 사용자는 홈으로 리다이렉트한다
  */
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  // 이미 인증된 사용자는 홈으로 이동
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   /**
    * Google 로그인 버튼 클릭 핸들러
@@ -115,7 +127,7 @@ export default function LoginPage() {
           <ShareIcon />
           <GlobeIcon />
         </div>
-        <p className="text-xs text-gray-300">© 2023 Skyline Planner Inc.</p>
+        <p className="text-xs text-gray-300">© 2024 Skyline Planner Inc.</p>
       </footer>
     </div>
   );

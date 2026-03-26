@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";import { fetchMe } from "../api/authApi";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMe } from "../api/authApi";
 import { useAuthStore } from "@/shared/stores/authStore";
 import { queryKeys } from "@/shared/api/queryKeys";
 

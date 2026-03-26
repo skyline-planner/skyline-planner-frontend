@@ -66,19 +66,6 @@ const MOCK_TRIP_SUMMARIES: TripSummary[] = [
 
 export const handlers = [
   /**
-   * Google OAuth 시작 핸들러
-   * 실제로는 백엔드가 Google 인증 URL로 리다이렉트하지만,
-   * MSW에서는 목업 토큰을 localStorage에 저장하는 응답을 반환한다.
-   */
-  http.get(`${BASE_URL}/auth/google`, () => {
-    return HttpResponse.json<ApiResponse<{ redirectUrl: string }>>({
-      data: { redirectUrl: "/home" },
-      error: null,
-      status: 200,
-    });
-  }),
-
-  /**
    * 내 프로필 조회 핸들러
    * Authorization 헤더가 없으면 401 반환
    */

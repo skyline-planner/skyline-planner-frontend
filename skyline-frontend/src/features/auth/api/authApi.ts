@@ -1,6 +1,6 @@
 import { api } from "@/shared/api/client";
 import type { ApiResponse } from "@/shared/types/api";
-import type { User } from "@/shared/types/domain";
+import type { User, UserStats, TripSummary } from "@/shared/types/domain";
 
 /**
  * Google OAuth 로그인을 시작한다.
@@ -13,7 +13,7 @@ export async function startGoogleOAuth(): Promise<void> {
   if (isMock) {
     // MSW 목업 환경: 가상 토큰을 저장하고 홈으로 이동
     localStorage.setItem("access_token", "mock-access-token");
-    window.location.href = "/home";
+    window.location.href = "/";
     return;
   }
 
@@ -34,8 +34,17 @@ export async function fetchMe(): Promise<ApiResponse<User>> {
 }
 
 /**
- * 로그아웃 처리: localStorage 토큰 제거
+ * 홈 화면에 표시할 최근 여행 요약 목록을 조회한다.
  */
-export function logout(): void {
-  localStorage.removeItem("access_token");
+export async function fetchTripsSummary(): Promise<ApiResponse<TripSummary[]>> {
+  const res = await api.get<ApiResponse<TripSummary[]>>("/users/me/trips/summary");
+  return res.data;
+}
+
+/**
+ * 현재 로그인된 사용자의 여행 통계를 조회한다.
+ */
+export async function fetchUserStats(): Promise<ApiResponse<UserStats>> {
+  const res = await api.get<ApiResponse<UserStats>>("/users/me/stats");
+  return res.data;
 }

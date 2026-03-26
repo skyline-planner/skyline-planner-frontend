@@ -2,10 +2,9 @@ import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/shared/stores/authStore";
-import { api } from "@/shared/api/client";
+import { fetchTripsSummary, fetchUserStats } from "../api/authApi";
 import { queryKeys } from "@/shared/api/queryKeys";
-import type { ApiResponse } from "@/shared/types/api";
-import type { TripSummary, UserStats } from "@/shared/types/domain";
+import type { TripSummary } from "@/shared/types/domain";
 
 /**
  * SCR-01 홈(랜딩) 화면
@@ -27,8 +26,8 @@ export default function LandingPage() {
   const { data: tripSummaries } = useQuery({
     queryKey: queryKeys.users.tripsSummary(),
     queryFn: async () => {
-      const res = await api.get<ApiResponse<TripSummary[]>>("/users/me/trips/summary");
-      return res.data.data;
+      const res = await fetchTripsSummary();
+      return res.data;
     },
     enabled: isAuthenticated,
   });
@@ -37,8 +36,8 @@ export default function LandingPage() {
   const { data: userStats } = useQuery({
     queryKey: queryKeys.users.stats(),
     queryFn: async () => {
-      const res = await api.get<ApiResponse<UserStats>>("/users/me/stats");
-      return res.data.data;
+      const res = await fetchUserStats();
+      return res.data;
     },
     enabled: isAuthenticated,
   });
@@ -68,9 +67,9 @@ export default function LandingPage() {
 
         {/* 내비게이션 */}
         <nav className="flex flex-col gap-1 mt-2">
-          <NavItem icon={<HomeIcon />} label="홈" active />
+          <NavItem icon={<HomeIcon />} label="홈" active onClick={() => navigate("/")} />
           <NavItem icon={<TripIcon />} label="트리핑" />
-          <NavItem icon={<MyTripIcon />} label="내 여행" />
+          <NavItem icon={<MyTripIcon />} label="내 여행" onClick={() => navigate("/trips")} />
           <NavItem icon={<SettingIcon />} label="설정" />
         </nav>
 
@@ -88,7 +87,7 @@ export default function LandingPage() {
         {/* 유저 정보 */}
         <div className="flex items-center gap-2 px-2 border-t border-gray-100 pt-4">
           <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-            {nickname[0]}
+            {nickname[0] ?? "?"}
           </div>
           <span className="text-sm text-gray-700 truncate">{nickname}</span>
         </div>
@@ -168,15 +167,15 @@ export default function LandingPage() {
               value="1,240"
               unit="km 달성"
               label="최적화 거리"
-              sublabel="동네사이를 70% 최적화"
+              sublabel="AI 경로 최적화 총 이동 거리"
               color="text-blue-400"
               stroke="#60a5fa"
             />
             <StatCircle
-              value={String(userStats?.completedTripCount ?? 42)}
-              unit="시간 절약"
-              label="절약한 시간"
-              sublabel="내가 사랑 절약한 시간도 소설됩"
+              value={String(userStats?.completedTripCount ?? 0)}
+              unit="회 완료"
+              label="완료한 여행"
+              sublabel="지금까지 완료한 여행 횟수"
               color="text-green-400"
               stroke="#4ade80"
             />
@@ -184,7 +183,7 @@ export default function LandingPage() {
               value="86%"
               unit=""
               label="플랜 달성률"
-              sublabel="계획대비 실제 성과율 완료됩"
+              sublabel="계획 대비 실제 성과율"
               color="text-purple-400"
               stroke="#c084fc"
             />
@@ -200,11 +199,13 @@ interface NavItemProps {
   icon: ReactNode;
   label: string;
   active?: boolean;
+  onClick?: () => void;
 }
 
-function NavItem({ icon, label, active = false }: NavItemProps) {
+function NavItem({ icon, label, active = false, onClick }: NavItemProps) {
   return (
     <button
+      onClick={onClick}
       className={[
         "flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm transition-colors",
         active
@@ -224,6 +225,8 @@ interface TripCardProps {
 }
 
 function TripCard({ trip }: TripCardProps) {
+  const navigate = useNavigate();
+
   // 지역별 배경색 팔레트 (목업용)
   const colorMap: Record<string, string> = {
     Japan: "bg-emerald-100",
@@ -234,7 +237,10 @@ function TripCard({ trip }: TripCardProps) {
   const bgColor = colorMap[trip.country ?? ""] ?? "bg-gray-100";
 
   return (
-    <div className="flex flex-col gap-2 cursor-pointer group">
+    <div
+      className="flex flex-col gap-2 cursor-pointer group"
+      onClick={() => navigate(`/trips/${trip.id}`)}
+    >
       <div
         className={`${bgColor} rounded-xl h-24 flex items-center justify-center group-hover:opacity-90 transition-opacity`}
       >
