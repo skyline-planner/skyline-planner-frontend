@@ -1,37 +1,16 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { routes } from "./routes";
 
-function LandingPage() {
-  return <div>SCR-01 Landing</div>;
-}
-function AuthPage() {
-  return <div>SCR-02 Auth</div>;
-}
-function HomePage() {
-  return <div>SCR-04 Home</div>;
-}
-function TripsPage() {
-  return <div>SCR-08 Trips</div>;
-}
-function ProfilePage() {
-  return <div>SCR-10 Profile</div>;
-}
-function NotFoundPage() {
-  return <div>SCR-13 404</div>;
-}
-
+/**
+ * 앱 전체 라우터
+ * 라우트 정의는 routes.tsx에서 관리하고, 여기서는 렌더링만 담당한다.
+ */
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/auth" element={<AuthPage />} />
-
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/trips" element={<TripsPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-
-      {/* 없는 주소는 바로 404 페이지를 보여준다 */}
-      <Route path="/404" element={<NotFoundPage />} />
-      <Route path="*" element={<Navigate to="/404" replace />} />
+      {routes.map((route) => (
+        <Route key={route.path} path={route.path} element={route.element} />
+      ))}
     </Routes>
   );
 }
