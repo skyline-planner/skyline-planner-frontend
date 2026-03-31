@@ -13,7 +13,7 @@ export async function startGoogleOAuth(): Promise<void> {
   if (isMock) {
     // MSW 목업 환경: 가상 토큰을 저장하고 홈으로 이동
     localStorage.setItem("access_token", "mock-access-token");
-    window.location.href = "/";
+    window.location.href = "/home";
     return;
   }
 

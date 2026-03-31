@@ -13,14 +13,20 @@ import { useAuthStore } from "@/shared/stores/authStore";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { isAuthenticated, clearAuth } = useAuthStore();
 
-  // 이미 인증된 사용자는 홈으로 이동
+  // /auth 직접 접근 시 기존 mock 토큰 초기화 (개발 환경 편의)
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/", { replace: true });
+    const isMock = import.meta.env.VITE_USE_MOCK === "true";
+    if (isMock) {
+      clearAuth();
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated) {
+      navigate("/home", { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Google 로그인 버튼 클릭 핸들러
